@@ -18,7 +18,7 @@ services:
       - key: SQLITE_PATH
         value: /data/chat.db
       - key: ALLOWED_ORIGINS
-        sync: false
+        value: https://lyon1n.github.io,https://lyon1n.github.io/ai-chat-project
       - key: CHROMA_PATH
         value: /data/chroma_db
       - key: UPLOAD_DIR
