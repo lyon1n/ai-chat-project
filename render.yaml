@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: ai-chat-api
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.9"
+      - key: DEEPSEEK_API_KEY
+        sync: false
+      - key: JWT_SECRET_KEY
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: MYSQL_SSL
+        value: "true"
+      - key: ALLOWED_ORIGINS
+        sync: false
+      - key: CHROMA_PATH
+        value: /data/chroma_db
+      - key: UPLOAD_DIR
+        value: /data/uploads
+    disk:
+      name: ai-chat-data
+      mountPath: /data
+      sizeGB: 1
