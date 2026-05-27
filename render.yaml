@@ -13,10 +13,10 @@ services:
         sync: false
       - key: JWT_SECRET_KEY
         sync: false
-      - key: DATABASE_URL
-        sync: false
-      - key: MYSQL_SSL
+      - key: USE_SQLITE
         value: "true"
+      - key: SQLITE_PATH
+        value: /data/chat.db
       - key: ALLOWED_ORIGINS
         sync: false
       - key: CHROMA_PATH

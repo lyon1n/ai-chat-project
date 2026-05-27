@@ -1,19 +1,30 @@
-from db import get_connection
+from db import get_connection, is_sqlite, sql
 from auth import hash_password, verify_password
 
 
 def init_users_table():
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute(
-        """
-        CREATE TABLE IF NOT EXISTS users (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            username VARCHAR(50) NOT NULL UNIQUE,
-            password VARCHAR(200) NOT NULL
+    if is_sqlite():
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT NOT NULL UNIQUE,
+                password TEXT NOT NULL
+            )
+            """
         )
-        """
-    )
+    else:
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS users (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                username VARCHAR(50) NOT NULL UNIQUE,
+                password VARCHAR(200) NOT NULL
+            )
+            """
+        )
     conn.commit()
     cursor.close()
     conn.close()
@@ -24,10 +35,12 @@ def create_user(username: str, password: str) -> int:
     cursor = conn.cursor()
     hashed = hash_password(password)
     cursor.execute(
-        """
-        INSERT INTO users (username, password)
-        VALUES (%s, %s)
-        """,
+        sql(
+            """
+            INSERT INTO users (username, password)
+            VALUES (%s, %s)
+            """
+        ),
         (username, hashed),
     )
     conn.commit()
@@ -41,12 +54,18 @@ def get_user_by_username(username: str):
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT id, username, password FROM users WHERE username = %s",
+        sql("SELECT id, username, password FROM users WHERE username = %s"),
         (username,),
     )
     user = cursor.fetchone()
     cursor.close()
     conn.close()
+    if is_sqlite() and user is not None:
+        return {
+            "id": user["id"],
+            "username": user["username"],
+            "password": user["password"],
+        }
     return user
 
 
