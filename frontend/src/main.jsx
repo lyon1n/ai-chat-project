@@ -7,13 +7,11 @@ import { getToken } from "./api.js";
 
 function Root() {
   const [authed, setAuthed] = useState(!!getToken());
-  const [username, setUsername] = useState("");
 
   if (!authed) {
     return (
       <Login
-        onLogin={(data) => {
-          setUsername(data.username || "");
+        onLogin={() => {
           setAuthed(true);
         }}
       />
@@ -22,10 +20,8 @@ function Root() {
 
   return (
     <App
-      username={username}
       onLogout={() => {
         setAuthed(false);
-        setUsername("");
       }}
     />
   );

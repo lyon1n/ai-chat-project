@@ -4,7 +4,7 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { tomorrow } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { apiFetch, authHeaders, clearToken } from "./api";
 
-function App({ username, onLogout }) {
+function App({ onLogout }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [file, setFile] = useState(null);
@@ -117,7 +117,7 @@ function App({ username, onLogout }) {
       }
       alert(`${data.message}，共切分为 ${data.chunk_count} 个文本块`);
     } catch {
-      alert("上传失败：网络错误或后端未响应，请确认 start-cloudflare.bat 正在运行");
+      alert("上传失败：网络错误或后端未响应，请确认后端已启动（uvicorn backend.main:app --reload）");
     } finally {
       setUploading(false);
     }
@@ -208,11 +208,6 @@ function App({ username, onLogout }) {
         }}
       >
         <h3 style={{ margin: 0 }}>知识库</h3>
-        {username && (
-          <p style={{ fontSize: "13px", color: "#8e8ea0", margin: "8px 0 0" }}>
-            {username}
-          </p>
-        )}
         <button
           onClick={() => {
             clearToken();
