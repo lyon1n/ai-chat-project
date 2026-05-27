@@ -127,7 +127,3 @@ frontend/            # React 前端
 render.yaml          # Render 部署配置
 .env.example         # 环境变量模板
 ```
-
-## 简历描述参考
-
-> 完成 AI 知识库问答系统，支持多用户 JWT 登录、RAG 向量检索、PDF 知识库管理，并部署至 Vercel + Render + 云端 MySQL。
