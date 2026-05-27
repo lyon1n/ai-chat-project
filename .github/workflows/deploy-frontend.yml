@@ -30,6 +30,7 @@ jobs:
         working-directory: frontend
         env:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          GITHUB_PAGES: "true"
         run: |
           npm ci
           npm run build
