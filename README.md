@@ -8,7 +8,7 @@
 
 ```bash
 pip install -r requirements.txt
-cp .env.example .env   # 填写 DEEPSEEK_API_KEY 等
+cp .env.example .env   
 python init_chat_db.py
 uvicorn main:app --reload
 ```
