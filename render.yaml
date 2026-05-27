@@ -16,14 +16,10 @@ services:
       - key: USE_SQLITE
         value: "true"
       - key: SQLITE_PATH
-        value: /data/chat.db
-      - key: ALLOWED_ORIGINS
-        value: https://lyon1n.github.io,https://lyon1n.github.io/ai-chat-project
+        value: ./chat.db
       - key: CHROMA_PATH
-        value: /data/chroma_db
+        value: ./chroma_db
       - key: UPLOAD_DIR
-        value: /data/uploads
-    disk:
-      name: ai-chat-data
-      mountPath: /data
-      sizeGB: 1
+        value: ./uploads
+      - key: ALLOWED_ORIGINS
+        value: "https://lyon1n.github.io,https://lyon1n.github.io/ai-chat-project"
