@@ -5,7 +5,9 @@ from urllib.parse import unquote, urlparse
 import pymysql
 from dotenv import load_dotenv
 
-load_dotenv()
+from .paths import ROOT_DIR, sqlite_path
+
+load_dotenv(os.path.join(ROOT_DIR, ".env"))
 
 
 def is_sqlite() -> bool:
@@ -22,7 +24,7 @@ def sql(query: str) -> str:
 
 def get_connection():
     if is_sqlite():
-        path = os.getenv("SQLITE_PATH", "./chat.db")
+        path = sqlite_path()
         if path != ":memory:":
             os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
         conn = sqlite3.connect(path, check_same_thread=False)

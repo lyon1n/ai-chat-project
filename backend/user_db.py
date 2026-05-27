@@ -1,5 +1,5 @@
-from db import get_connection, is_sqlite, sql
-from auth import hash_password, verify_password
+from .db import get_connection, is_sqlite, sql
+from .auth import hash_password, verify_password
 
 
 def init_users_table():

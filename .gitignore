@@ -8,11 +8,11 @@ __pycache__/
 # 环境变量（含密钥，勿提交）
 .env
 .env.local
-.env.production
 
 # 本地数据
 chroma_db/
 uploads/
+chat.db
 *.pdf
 
 # IDE
@@ -21,8 +21,8 @@ uploads/
 
 # 前端
 frontend/node_modules/
-static/
 frontend/dist/
+static/
 
 # 系统
 .DS_Store

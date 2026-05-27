@@ -1,37 +1,36 @@
 import os
 
-from auth import create_token, get_user
-from chat_db import (
+from .auth import create_token, get_user
+from .chat_db import (
     delete_chat_history,
-    display_collection,
     get_chat_history,
     init_chat_messages_table,
     normalize_collection,
     save_chat_message,
-    scoped_collection,
 )
-from chunk import split_text
-from chroma_utils import (
+from .chunk import split_text
+from .chroma_utils import (
+    chroma_storage_name,
     client as chroma_client,
+    collection_display_name,
     delete_collection,
-    get_collection_count,
     save_chunks,
     search_chunks,
 )
-from document_store import get_document_info, load_from_disk, set_chunks
+from .document_store import get_document_info, load_from_disk, set_chunks
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, File, Header, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from openai import OpenAI
-from pdf_utils import read_pdf
+from .paths import ROOT_DIR, upload_dir
+from .pdf_utils import read_pdf
 from pydantic import BaseModel
 from starlette.responses import StreamingResponse
-from user_db import authenticate_user, create_user, get_user_by_username, init_users_table
+from .user_db import authenticate_user, create_user, get_user_by_username, init_users_table
 
-load_dotenv()
+load_dotenv(os.path.join(ROOT_DIR, ".env"))
 
-UPLOAD_DIR = os.getenv("UPLOAD_DIR", "uploads")
+UPLOAD_DIR = upload_dir()
 
 openai_client = OpenAI(
     api_key=os.getenv("DEEPSEEK_API_KEY"),
@@ -50,7 +49,7 @@ def on_startup():
 
 
 def _cors_origins():
-    raw = os.getenv("ALLOWED_ORIGINS", "*")
+    raw = os.getenv("ALLOWED_ORIGINS", "http://127.0.0.1:5173,http://localhost:5173")
     if raw.strip() == "*":
         return ["*"]
     return [origin.strip() for origin in raw.split(",") if origin.strip()]
@@ -95,7 +94,7 @@ def get_current_user(authorization: str | None = Header(None)):
 
 
 def user_chroma_name(user_id: int, collection: str) -> str:
-    return scoped_collection(user_id, collection)
+    return chroma_storage_name(user_id, collection)
 
 
 def list_user_collections(user_id: int):
@@ -103,10 +102,9 @@ def list_user_collections(user_id: int):
     items = []
     for c in chroma_client.list_collections():
         if c.name.startswith(prefix):
-            display_name = display_collection(c.name, user_id)
             items.append({
-                "name": display_name,
-                "chunk_count": get_collection_count(c.name),
+                "name": collection_display_name(c),
+                "chunk_count": c.count(),
             })
     return items
 
@@ -244,7 +242,11 @@ async def upload_file(
     with open(file_path, "wb") as f:
         f.write(content)
 
-    pdf_text = read_pdf(file_path)
+    try:
+        pdf_text = read_pdf(file_path)
+    except Exception:
+        raise HTTPException(status_code=400, detail="PDF 文件损坏或无法读取")
+
     if not pdf_text or not pdf_text.strip():
         raise HTTPException(
             status_code=400,
@@ -258,7 +260,13 @@ async def upload_file(
     base_name = file.filename.replace(".pdf", "").replace(".PDF", "")
     user_id = current_user["user_id"]
     chroma_name = user_chroma_name(user_id, base_name)
-    save_chunks(chroma_name, chunks)
+    try:
+        save_chunks(chroma_name, chunks, display_name=base_name)
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"向量库存储失败：{e}",
+        ) from e
     set_chunks(chunks, file.filename)
 
     return {
@@ -308,13 +316,8 @@ def chat(
     return StreamingResponse(generate(), media_type="text/plain")
 
 
-STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
-if os.path.isdir(STATIC_DIR):
-    app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="frontend")
-
-
 if __name__ == "__main__":
     import uvicorn
 
     port = int(os.environ.get("PORT", 8000))
-    uvicorn.run("main:app", host="0.0.0.0", port=port)
+    uvicorn.run("backend.main:app", host="127.0.0.1", port=port, reload=True)

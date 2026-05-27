@@ -1,7 +1,9 @@
 import json
 import os
 
-UPLOAD_DIR = os.getenv("UPLOAD_DIR", "uploads")
+from .paths import upload_dir
+
+UPLOAD_DIR = upload_dir()
 CACHE_PATH = os.path.join(UPLOAD_DIR, "document_cache.json")
 
 _chunks = []

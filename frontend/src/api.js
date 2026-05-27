@@ -22,6 +22,10 @@ export function authHeaders(extra = {}) {
 
 export async function apiFetch(path, options = {}) {
   const headers = authHeaders(options.headers || {});
+  if (options.body instanceof FormData) {
+    delete headers["Content-Type"];
+    delete headers["content-type"];
+  }
   const response = await fetch(`${API}${path}`, { ...options, headers });
 
   if (response.status === 401) {

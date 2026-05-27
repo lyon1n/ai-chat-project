@@ -101,7 +101,8 @@ function App({ username, onLogout }) {
         let errMsg = "上传失败，请检查后端是否已启动";
         try {
           const err = await response.json();
-          if (err.detail) errMsg = err.detail;
+          if (typeof err.detail === "string") errMsg = err.detail;
+          else if (Array.isArray(err.detail)) errMsg = err.detail.map((d) => d.msg).join("; ");
         } catch {
           /* ignore */
         }
@@ -115,6 +116,8 @@ function App({ username, onLogout }) {
         setCurrentCollection(data.collection);
       }
       alert(`${data.message}，共切分为 ${data.chunk_count} 个文本块`);
+    } catch {
+      alert("上传失败：网络错误或后端未响应，请确认 start-cloudflare.bat 正在运行");
     } finally {
       setUploading(false);
     }

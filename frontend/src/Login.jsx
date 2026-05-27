@@ -8,6 +8,11 @@ export default function Login({ onLogin }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const switchMode = (next) => {
+    setMode(next);
+    setError("");
+  };
+
   const submit = async () => {
     if (!username.trim() || !password) {
       setError("请输入用户名和密码");
@@ -33,8 +38,7 @@ export default function Login({ onLogin }) {
       }
 
       if (mode === "register") {
-        setMode("login");
-        setError("");
+        switchMode("login");
         alert("注册成功，请登录");
         return;
       }
@@ -51,11 +55,13 @@ export default function Login({ onLogin }) {
   return (
     <div
       style={{
-        minHeight: "100vh",
+        position: "fixed",
+        inset: 0,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         background: "#f0f2f5",
+        zIndex: 1000,
       }}
     >
       <div
@@ -67,10 +73,36 @@ export default function Login({ onLogin }) {
           boxShadow: "0 4px 24px rgba(0,0,0,0.08)",
         }}
       >
-        <h2 style={{ margin: "0 0 8px", textAlign: "center" }}>
+        <h2 style={{ margin: "0 0 20px", textAlign: "center", color: "#000" }}>
           AI 知识库聊天
         </h2>
-        <p style={{ margin: "0 0 24px", textAlign: "center", color: "#888" }}>
+
+        <div
+          style={{
+            display: "flex",
+            marginBottom: "24px",
+            borderRadius: "8px",
+            background: "#f5f5f5",
+            padding: "4px",
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => switchMode("login")}
+            style={tabStyle(mode === "login")}
+          >
+            登录
+          </button>
+          <button
+            type="button"
+            onClick={() => switchMode("register")}
+            style={tabStyle(mode === "register")}
+          >
+            注册
+          </button>
+        </div>
+
+        <p style={{ margin: "0 0 16px", textAlign: "center", color: "#666" }}>
           {mode === "login" ? "登录你的账号" : "创建新账号"}
         </p>
 
@@ -96,6 +128,7 @@ export default function Login({ onLogin }) {
         )}
 
         <button
+          type="button"
           onClick={submit}
           disabled={loading}
           style={{
@@ -112,34 +145,23 @@ export default function Login({ onLogin }) {
         >
           {loading ? "请稍候..." : mode === "login" ? "登录" : "注册"}
         </button>
-
-        <p style={{ textAlign: "center", marginTop: "16px", fontSize: "14px" }}>
-          {mode === "login" ? (
-            <>
-              没有账号？{" "}
-              <span
-                onClick={() => setMode("register")}
-                style={{ color: "#1677ff", cursor: "pointer" }}
-              >
-                去注册
-              </span>
-            </>
-          ) : (
-            <>
-              已有账号？{" "}
-              <span
-                onClick={() => setMode("login")}
-                style={{ color: "#1677ff", cursor: "pointer" }}
-              >
-                去登录
-              </span>
-            </>
-          )}
-        </p>
       </div>
     </div>
   );
 }
+
+const tabStyle = (active) => ({
+  flex: 1,
+  height: "36px",
+  border: "none",
+  borderRadius: "6px",
+  background: active ? "#fff" : "transparent",
+  color: active ? "#1677ff" : "#666",
+  fontSize: "15px",
+  fontWeight: active ? 600 : 400,
+  cursor: "pointer",
+  boxShadow: active ? "0 1px 4px rgba(0,0,0,0.08)" : "none",
+});
 
 const inputStyle = {
   width: "100%",

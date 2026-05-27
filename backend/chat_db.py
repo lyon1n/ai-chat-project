@@ -1,4 +1,4 @@
-from db import get_connection, is_sqlite, sql
+from .db import get_connection, is_sqlite, sql
 
 
 def normalize_collection(collection: str | None) -> str:
