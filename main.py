@@ -22,6 +22,7 @@ from document_store import get_document_info, load_from_disk, set_chunks
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, File, Header, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from openai import OpenAI
 from pdf_utils import read_pdf
 from pydantic import BaseModel
@@ -305,6 +306,11 @@ def chat(
         save_chat_message("assistant", full_reply, collection_key, user_id)
 
     return StreamingResponse(generate(), media_type="text/plain")
+
+
+STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
+if os.path.isdir(STATIC_DIR):
+    app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="frontend")
 
 
 if __name__ == "__main__":

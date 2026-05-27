@@ -1,14 +1,11 @@
 services:
   - type: web
-    name: ai-chat-api
-    runtime: python
+    name: ai-chat
+    runtime: docker
     plan: free
-    buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    dockerfilePath: ./Dockerfile
     healthCheckPath: /health
     envVars:
-      - key: PYTHON_VERSION
-        value: "3.11.9"
       - key: DEEPSEEK_API_KEY
         sync: false
       - key: JWT_SECRET_KEY
@@ -21,5 +18,3 @@ services:
         value: ./chroma_db
       - key: UPLOAD_DIR
         value: ./uploads
-      - key: ALLOWED_ORIGINS
-        value: "https://lyon1n.github.io,https://lyon1n.github.io/ai-chat-project"
