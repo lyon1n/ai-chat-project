@@ -7,10 +7,12 @@ export default function Login({ onLogin }) {
   const [mode, setMode] = useState("login");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const switchMode = (next) => {
     setMode(next);
     setError("");
+    setSuccess("");
   };
 
   const submit = async () => {
@@ -21,6 +23,7 @@ export default function Login({ onLogin }) {
 
     setLoading(true);
     setError("");
+    setSuccess("");
 
     try {
       const endpoint = mode === "login" ? "/login" : "/register";
@@ -39,7 +42,7 @@ export default function Login({ onLogin }) {
 
       if (mode === "register") {
         switchMode("login");
-        alert("注册成功，请登录");
+        setSuccess("注册成功，请登录");
         return;
       }
 
@@ -107,13 +110,17 @@ export default function Login({ onLogin }) {
         </p>
 
         <input
+          aria-label="用户名"
+          autoComplete="username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           placeholder="用户名"
           style={inputStyle}
         />
         <input
+          aria-label="密码"
           type="password"
+          autoComplete={mode === "login" ? "current-password" : "new-password"}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && submit()}
@@ -124,6 +131,11 @@ export default function Login({ onLogin }) {
         {error && (
           <p style={{ color: "#ff4d4f", fontSize: "14px", marginTop: "12px" }}>
             {error}
+          </p>
+        )}
+        {success && (
+          <p style={{ color: "#16a34a", fontSize: "14px", marginTop: "12px" }}>
+            {success}
           </p>
         )}
 

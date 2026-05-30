@@ -1,4 +1,6 @@
-const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://127.0.0.1:8000" : "");
+const API =
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.DEV ? "http://127.0.0.1:8000" : "");
 
 export function getToken() {
   return localStorage.getItem("token");
@@ -16,7 +18,7 @@ export function authHeaders(extra = {}) {
   const token = getToken();
   return {
     ...extra,
-    ...(token ? { Authorization: token } : {}),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
 }
 
@@ -35,6 +37,18 @@ export async function apiFetch(path, options = {}) {
   }
 
   return response;
+}
+
+export async function errorMessage(response, fallback = "操作失败") {
+  try {
+    const data = await response.json();
+    if (typeof data.detail === "string") return data.detail;
+    if (Array.isArray(data.detail)) return data.detail.map((item) => item.msg).join("; ");
+    if (data.error) return data.error;
+  } catch {
+    /* ignore */
+  }
+  return fallback;
 }
 
 export { API };

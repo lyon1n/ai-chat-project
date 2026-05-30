@@ -8,6 +8,8 @@
 - 上传 PDF 自动分块、向量化（ChromaDB）
 - 选择知识库进行 RAG 问答（流式回复）
 - 多知识库管理（切换、删除）
+- 按用户隔离上传文件、向量库和聊天历史
+- PDF 分页分块并保留来源信息
 
 ## 技术栈
 
@@ -50,6 +52,7 @@ copy .env.example .env        # Windows
 ```env
 DEEPSEEK_API_KEY=你的密钥
 USE_SQLITE=true
+JWT_SECRET_KEY=请换成随机字符串
 ```
 
 ### 2. 安装依赖
@@ -98,6 +101,7 @@ npm run dev
 
 - 确认 `.env` 中已配置 `DEEPSEEK_API_KEY`
 - 使用可选中文字的 PDF（扫描版图片 PDF 无法提取文字）
+- 默认单个 PDF 最大 `20MB`，可通过 `.env` 的 `MAX_UPLOAD_MB` 调整
 
 **登录 / 注册无响应？**
 
@@ -114,3 +118,30 @@ MYSQL_USER=root
 MYSQL_PASSWORD=你的密码
 MYSQL_DATABASE=ai_chat
 ```
+
+## 开发检查
+
+后端：
+
+```bash
+pip install -r requirements.txt
+ruff check backend tests
+pytest
+```
+
+前端：
+
+```bash
+cd frontend
+npm install
+npm run lint
+npm run test
+npm run build
+```
+
+## 生产配置提示
+
+- `APP_ENV=production` 时必须显式配置 `JWT_SECRET_KEY`
+- 前端生产构建需要设置 `frontend/.env` 中的 `VITE_API_URL`
+- 建议只把可信前端域名加入 `ALLOWED_ORIGINS`
+- 本地数据目录可用 `UPLOAD_DIR`、`CHROMA_PATH`、`SQLITE_PATH` 自定义

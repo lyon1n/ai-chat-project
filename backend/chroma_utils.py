@@ -18,9 +18,12 @@ def chroma_storage_name(user_id: int, display_name: str) -> str:
     raw = display_name.strip()
     safe = re.sub(r"[^a-zA-Z0-9._-]", "_", raw)
     safe = re.sub(r"_+", "_", safe).strip("._-")
-    candidate = f"u{user_id}_{safe}" if safe else f"u{user_id}_doc"
+    if not safe:
+        digest = hashlib.md5(raw.encode("utf-8")).hexdigest()[:12]
+        return f"u{user_id}_doc_{digest}"
+    candidate = f"u{user_id}_{safe}"
     if len(candidate) >= 3 and _CHROMA_NAME_RE.match(candidate):
-        return candidate[:512]
+        return candidate[:512].rstrip("._-")
     digest = hashlib.md5(raw.encode("utf-8")).hexdigest()[:12]
     return f"u{user_id}_doc_{digest}"
 
@@ -50,15 +53,33 @@ def collection_display_name(collection) -> str:
     return meta.get("display_name") or collection.name
 
 
+def _chunk_content(chunk) -> str:
+    if isinstance(chunk, dict):
+        return chunk.get("content", "")
+    return str(chunk)
+
+
+def _chunk_metadata(chunk, index: int) -> dict:
+    metadata = {"chunk_index": index}
+    if isinstance(chunk, dict):
+        metadata.update(chunk.get("metadata") or {})
+    return {
+        key: value
+        for key, value in metadata.items()
+        if isinstance(value, (str, int, float, bool))
+    }
+
+
 def save_chunks(collection_name, chunks, display_name=None):
     delete_collection(collection_name)
     collection = get_collection(collection_name, display_name=display_name)
 
-    for index, chunk in enumerate(chunks):
-        collection.add(
-            documents=[chunk],
-            ids=[f"{collection_name}_{index}"],
-        )
+    documents = [_chunk_content(chunk) for chunk in chunks]
+    metadatas = [_chunk_metadata(chunk, index) for index, chunk in enumerate(chunks)]
+    ids = [f"{collection_name}_{index}" for index in range(len(documents))]
+
+    if documents:
+        collection.add(documents=documents, metadatas=metadatas, ids=ids)
 
 
 def search_chunks(collection_name, question, top_k=3):
@@ -70,5 +91,16 @@ def search_chunks(collection_name, question, top_k=3):
     results = collection.query(
         query_texts=[question],
         n_results=min(top_k, count),
+        include=["documents", "metadatas", "distances"],
     )
-    return results["documents"][0]
+    documents = results.get("documents", [[]])[0]
+    metadatas = results.get("metadatas", [[]])[0]
+    distances = results.get("distances", [[]])[0]
+    return [
+        {
+            "content": document,
+            "metadata": metadatas[index] or {},
+            "distance": distances[index] if index < len(distances) else None,
+        }
+        for index, document in enumerate(documents)
+    ]

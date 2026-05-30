@@ -84,24 +84,40 @@ def save_chat_message(
     conn.close()
 
 
-def get_chat_history(collection: str | None, user_id: int):
+def get_chat_history(collection: str | None, user_id: int, limit: int | None = None):
     collection_key = normalize_collection(collection)
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute(
-        sql(
-            """
-            SELECT role, content
-            FROM chat_messages
-            WHERE collection = %s AND user_id = %s
-            ORDER BY id ASC
-            """
-        ),
-        (collection_key, user_id),
-    )
+    if limit and limit > 0:
+        cursor.execute(
+            sql(
+                """
+                SELECT role, content
+                FROM chat_messages
+                WHERE collection = %s AND user_id = %s
+                ORDER BY id DESC
+                LIMIT %s
+                """
+            ),
+            (collection_key, user_id, limit),
+        )
+    else:
+        cursor.execute(
+            sql(
+                """
+                SELECT role, content
+                FROM chat_messages
+                WHERE collection = %s AND user_id = %s
+                ORDER BY id ASC
+                """
+            ),
+            (collection_key, user_id),
+        )
     rows = cursor.fetchall()
     cursor.close()
     conn.close()
+    if limit and limit > 0:
+        rows = list(reversed(rows))
     if is_sqlite():
         return [{"role": row["role"], "content": row["content"]} for row in rows]
     return rows

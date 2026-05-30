@@ -1,13 +1,10 @@
-import os
 from datetime import datetime, timedelta, timezone
 
 import bcrypt
-from dotenv import load_dotenv
 from jose import JWTError, jwt
 
-load_dotenv()
+from .config import jwt_secret_key
 
-SECRET_KEY = os.getenv("JWT_SECRET_KEY", "ai-chat-secret")
 ALGORITHM = "HS256"
 
 
@@ -25,11 +22,11 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 def create_token(data: dict) -> str:
     payload = data.copy()
     payload["exp"] = datetime.now(timezone.utc) + timedelta(days=7)
-    return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+    return jwt.encode(payload, jwt_secret_key(), algorithm=ALGORITHM)
 
 
 def verify_token(token: str) -> dict:
-    return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    return jwt.decode(token, jwt_secret_key(), algorithms=[ALGORITHM])
 
 
 def get_user(token: str) -> dict:
