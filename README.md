@@ -26,6 +26,8 @@
 ai-chat-project/
 ├── backend/          # FastAPI 后端
 ├── frontend/         # React 前端
+├── docs/             # 项目展示材料
+├── scripts/          # 本地启动和演示脚本
 ├── requirements.txt
 └── .env.example
 ```
@@ -88,6 +90,44 @@ npm run dev
 访问 **http://127.0.0.1:5173**
 
 > **注意：** `8000` 端口是后端 API，不是网页。请访问 `5173` 端口的前端地址。
+
+## 公网演示（Cloudflare Tunnel）
+
+本项目支持免费临时公网演示：本机运行前后端，再用 Cloudflare Tunnel 暴露前端地址。
+
+### 1. 安装 cloudflared
+
+下载并安装：[Cloudflare Tunnel downloads](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/)
+
+安装后确认：
+
+```bash
+cloudflared --version
+```
+
+### 2. 启动演示
+
+在项目根目录执行：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/start-demo-cloudflare.ps1
+```
+
+脚本会自动启动：
+
+- 后端：`http://127.0.0.1:8000`
+- 前端：`http://127.0.0.1:5173`
+- Tunnel：临时 `https://*.trycloudflare.com` 演示链接
+
+终端中出现的 `https://*.trycloudflare.com` 地址即可发给面试官或同学体验。
+
+> 说明：Cloudflare Tunnel 免费临时链接不是永久服务器。电脑、后端、前端和 Tunnel 窗口都必须保持运行。
+
+## 项目展示材料
+
+- [项目展示与面试讲解](docs/project-showcase.md)
+- 截图建议目录：`docs/screenshots/`
+- 推荐截图：登录页、上传 PDF、知识库问答、多知识库管理
 
 ## 常见问题
 
